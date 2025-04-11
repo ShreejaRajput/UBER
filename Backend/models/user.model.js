@@ -27,15 +27,15 @@ const userSchema=new mongoose.Schema({
             type:String,
             required:true,
             select:false,
-            // minlength:[8,'Password must be atleast 8 characters long'],
+    minlength:[8,'Password must be atleast 8 characters long'],
     },
 
-    socletId:{
+    socketId:{
         type:String,
     },
 })
 
-userSchema.methods.generAuthToken=function(){
+userSchema.methods.generateAuthToken=function(){
     const token=jwt.sign({_id: this._id},process.env.JWT_SECRET);
     return token;
 }
