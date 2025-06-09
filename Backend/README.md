@@ -258,3 +258,97 @@ Logout the current user and blacklist the token provided in cookie or headers.
 ### Authentication
 
 Requires a valid JWT token in the Authorization header or cookie:
+
+# API Documentation: /captain/register
+
+## Endpoint
+`POST /captain/register`
+
+## Description
+This endpoint is used to register a new captain. It validates the input data and creates a new captain profile in the database if the data is valid.
+
+## Request Body
+The request body should be in JSON format and include the following fields:
+
+- `fullname` (object, required):
+  - `firstname` (string, required): Must be at least 3 characters long
+  - `lastname` (string, required): Must be at least 3 characters long
+- `email` (string, required): Must be a valid email address
+- `password` (string, required): Must be at least 6 characters long
+- `vehicle` (object, required):
+  - `color` (string, required): Must be at least 3 characters long
+  - `plate` (string, required): Must be at least 3 characters long
+  - `capacity` (number, required): Must be a valid number
+  - `vehicleType` (string, required): Must be at least 3 characters long
+
+### Example Request Body
+```json
+{
+  "fullname": {
+    "firstname": "John",
+    "lastname": "Doe"
+  },
+  "email": "johndoe@example.com",
+  "password": "password123",
+  "vehicle": {
+    "color": "Black",
+    "plate": "ABC123",
+    "capacity": 4,
+    "vehicleType": "Sedan"
+  }
+}
+```
+
+## Responses
+
+### Success Response
+- **Status Code:** `201 Created`
+- **Body:**
+  ```json
+  {
+    "captain": {
+      "_id": "<CAPTAIN_ID>",
+      "fullname": {
+        "firstname": "John",
+        "lastname": "Doe"
+      },
+      "email": "johndoe@example.com",
+      "vehicle": {
+        "color": "Black",
+        "plate": "ABC123",
+        "capacity": 4,
+        "vehicleType": "Sedan"
+      }
+    },
+    "token": "<JWT_TOKEN>"
+  }
+  ```
+
+### Error Responses
+
+#### Validation Error
+- **Status Code:** `400 Bad Request`
+- **Body:**
+  ```json
+  {
+    "errors": [
+      {
+        "msg": "First name must be at least 3 characters long",
+        "param": "fullname.firstname",
+        "location": "body"
+      }
+    ]
+  }
+  ```
+
+#### Captain Already Exists
+- **Status Code:** `400 Bad Request`
+- **Body:**
+  ```json
+  {
+    "message": "Captain already exists"
+  }
+  ```
+### Example Response 
+- `captain` (object):
+ 
