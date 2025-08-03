@@ -351,4 +351,38 @@ The request body should be in JSON format and include the following fields:
   ```
 ### Example Response 
 - `captain` (object):
- 
+
+# API Documentation: /captains/logout
+
+## Endpoint
+`GET /captains/logout`
+
+## Description
+Logs out the currently authenticated captain by blacklisting their token. Requires a valid JWT token in the Authorization header or cookie.
+
+## Response
+```json
+{
+  "message": "Logout successful"
+}
+```
+
+## Error Response
+```json
+{
+  "message": "Logout failed",
+  "error": "Error details"
+}
+```
+
+---
+
+## Validation Improvements
+
+- **UserProtectedWrapper:**  
+  Now validates the token and user profile more robustly, redirecting to login if invalid or expired.
+
+- **CaptainProtectedWrapper:**  
+  Now validates the token and captain profile more robustly, redirecting to captain login if invalid or expired.
+
+Refer to the frontend wrappers for implementation details.

@@ -16,4 +16,8 @@ router.post('/register',[
 ],
 captainController.registerCaptain);
 
+router.post('/login', captainController.loginCaptain);
+
+router.get('/logout', captainController.logoutCaptain);
+
 module.exports=router;
