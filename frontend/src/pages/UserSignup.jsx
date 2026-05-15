@@ -1,124 +1,87 @@
-import React from 'react'
-import {Link,useNavigate} from 'react-router-dom'
-import axios from 'axios'
-import {UserDataContext} from '../context/userContext'
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { UserDataContext } from '../context/userContext';
+import api from '../utils/axiosInstance';
 
+const Userlogin = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-const UserSignup = () => {
+  const { setUser } = useContext(UserDataContext);
+  const navigate = useNavigate();
 
-  const[email,setEmail]=React.useState('');
-  const[password,setPassword]=React.useState('');
-  const[firstName,setFirstName]=React.useState('');
-  const[lastName,setLastName]=React.useState('');
-  const[userData,setUserData]=React.useState();
-
-  const navigate=useNavigate();
-
-  const {user,setUser}=React.useContext(UserDataContext);
-
-  const submitHandler=async(e)=>{
+  const submitHandler = async (e) => {
     e.preventDefault();
-    const newUser={
-      fullname:{
-        firstname:firstName,
-        lastname:lastName,
-      },
-      email:email,
-      password:password,
+    console.log('🔥 submit fired', email, password);
 
+    try {
+      const response = await api.post('/users/login', { email, password });
+
+      if (response.status === 200) {
+        setUser(response.data.user);
+        localStorage.setItem('token', response.data.token);
+        navigate('/home');
+      }
+    } catch (error) {
+      console.error('Login error:', error.response?.status, error.response?.data || error.message);
+      alert(`Login failed: ${error.response?.data?.message || 'Unauthorized. Check credentials.'}`);
+    } finally {
+      setEmail('');
+      setPassword('');
     }
-   
-
-    const response=await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`,newUser)
-
-    if(response.status===201){
-      const data=response.data;
-
-      setUser(data.user);
-      localStorage.setItem('token',data.token);
-      navigate('/home');
-    }
-
-    console.log(userData);
-    setEmail('');
-    setPassword('');
-    setFirstName('');
-    setLastName('');
-  }
-
-
+  };
 
   return (
     <div className='p-7 h-screen flex flex-col justify-between'>
       <div>
         <img className='w-16 mb-5' src="Uber-logo.png" alt="" />
-        <form onSubmit={(e)=>{
-          submitHandler(e)
-        }}
-        action="">
-                    <h3 className='text-base font-medium mb-2'>What's your Name?</h3>
-
-                    <div className='flex gap-4 mb-5'>
-                      <input
-                      required
-                      className='bg-[#eeee] rounded px-4 py-2 border w-1/2 text-base placeholder:text-base'
-                      type="text" 
-                      placeholder='Firstname'
-                      value={firstName}
-                      onChange={(e)=>{
-                        setFirstName(e.target.value);
-                      }}/>
-
-                      <input 
-                      type="text"
-                       required
-                      className='bg-[#eeee]  rounded px-4 py-2 border w-1/2 text-base placeholder:text-base' 
-                      placeholder='Lastname' 
-                      value={lastName}
-                      onChange={(e)=>{
-                        setLastName(e.target.value);
-                      }}/>
-                    </div>
-
-          <h3 className='text-base font-medium mb-2'>What's your email?</h3>
-
-          <input 
-          
-          required
-          
-          className='bg-[#eeee] mb-5 rounded px-4 py-2 border w-full text-lg placeholder:text-base'
-          type='email'
-          placeholder='email@example.com' 
-          value={email}
-          onChange={(e)=>{
-            setEmail(e.target.value);
-          }}
+        {/* ✅ no action="" here */}
+        <form onSubmit={submitHandler}>
+          <h3 className='text-lg font-medium mb-2'>What's your email?</h3>
+          <input
+            id="email"
+            autoComplete='email'
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className='bg-[#eeee] mb-7 rounded px-4 py-2 border w-full text-lg placeholder:text-base'
+            type="email"
+            placeholder='email@example.com'
           />
 
-          <h3 className='text-base font-medium mb-2'>Enter Password</h3>
-          <input 
-          required
-          value={password}
-          className='bg-[#eeee] mb-5 rounded px-4 py-2 border w-full text-lg placeholder:text-base'
-          type="password" 
-          placeholder='password'
-          onChange={(e)=>{
-            setPassword(e.target.value);
-          }}/>
+          <h3 className='text-lg font-medium mb-2'>Enter Password</h3>
+          <input
+            id="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className='bg-[#eeee] mb-7 rounded px-4 py-2 border w-full text-lg placeholder:text-base'
+            type="password"
+            placeholder='password'
+          />
 
           <button
-            className='bg-[#111] text-white font-semibold rounded mb-7 px-4 py-2 w-full text-lg placeholder:text-base'>
-            Sign-Up
+            type="submit"
+            className='bg-[#111] text-white font-semibold rounded mb-7 px-4 py-2 w-full text-lg'
+          >
+            Login
           </button>
-          <p className='text-center-align'>Already a User?<Link to='/login' className='text-blue-600 mb-3'>Login </Link></p>
+
+          <p className='text-center'>
+            New Here? <Link to='/signup' className='text-blue-600 mb-3'>Create new Account</Link>
+          </p>
         </form>
       </div>
       <div>
-        <p className='text-[10px] leading-tight'>This site is protected by reCAPTHA and the <span className='underline'>Google Privacy policy</span> and <span className='underline'>Terms of Service apply</span>.</p>
+        <Link
+          to='/captain-login'
+          className='bg-[#10b461] flex items-center justify-center text-white font-semibold rounded px-4 py-2 w-full text-lg'
+        >
+          Sign-in as Captain
+        </Link>
       </div>
-      
     </div>
-  )
-}
+  );
+};
 
-export default UserSignup
+export default Userlogin;
