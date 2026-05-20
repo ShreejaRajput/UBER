@@ -23,7 +23,7 @@ const LocationSearchPanel = (props) => {
             className='border-2 p-3 rounded-xl border-gray-100 active:border-black flex gap-4 items-center my-4 justify-start'
           >
             <h2 className='tex-lg font-medium bg-[#eee] h-5 w-5 flex intems-center justify-center rounded-full'>
-              <i className="fa-solid fa-location-crosshairs text-xl"></i>
+              <i className=" ri-map-pin-4-fill text-xl bg-white"></i>
             </h2>
             <h4>{elem}</h4>
           </div>

@@ -173,7 +173,7 @@ if(response.status===201){
         </form>
       </div>
       <div>
-        <p className='text-[10px] leading-tight'>This site is protected by reCAPTHA and the <span className='underline'>Google Privacy policy</span> and <span className='underline'>Terms of Service apply</span>.</p>
+        <p className='text-[10px] mt-6 leading-tight'>This site is protected by reCAPTHA and the <span className='underline'>Google Privacy policy</span> and <span className='underline'>Terms of Service apply</span>.</p>
       </div>
     </div>
   )
