@@ -189,14 +189,13 @@ Authorization: Bearer <jwt_token>
 ### Response
 ```json
 {
-  "success": true,
-  "data": {
-    "id": "string",
-    "name": "string",
-    "email": "string",
-    "phone": "string",
-    "role": "string",
-    "createdAt": "string"
+  "user": {
+    "_id": "<USER_ID>",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "example@example.com"
   }
 }
 ```
@@ -214,7 +213,7 @@ Logs out the currently authenticated user by invalidating their token.
 
 ### Request
 ```http
-POST /users/logout
+GET /users/logout
 ```
 
 ### Headers
@@ -225,26 +224,346 @@ Authorization: Bearer <jwt_token>
 ### Response
 ```json
 {
-  "success": true,
-  "message": "Logged out successfully"
+  "message": "Logout successful"
 }
 ```
 
 ### Error Response
 ```json
 {
-  "success": false,
   "message": "Error message"
 }
 ```
 
-### Example Response 
--'user'(object):
--'fullname'(object):
-  -'firstname'(string):User's first name (min 3 characters).
-  -'lastname'(string):User's last name (min 3 characters).
--'email'(string):User's email (min 3 characters).
+## Ride Endpoints
 
+### Create Ride
+Creates a new ride request for the authenticated user.
+
+#### Request
+```http
+POST /rides/create
+```
+
+#### Headers
+```
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
+```
+
+#### Request Body
+```json
+{
+  "pickup": "string",
+  "dropoff": "string",
+  "vehicleType": "auto|car|motorcycle"
+}
+```
+
+#### Success Response
+```json
+{
+  "message": "Ride created successfully",
+  "ride": {
+    "_id": "<RIDE_ID>",
+    "userId": "<USER_ID>",
+    "pickup": "<pickup_address>",
+    "destination": "<dropoff_address>",
+    "vehicleType": "car",
+    "fare": 180,
+    "status": "pending"
+  }
+}
+```
+
+#### Error Responses
+- **400 Bad Request** when validation fails.
+- **500 Internal Server Error** when ride creation fails.
+
+### Get Fare
+Calculates fare estimates for a trip between pickup and dropoff.
+
+#### Request
+```http
+GET /rides/get-fare?pickup=<pickup_address>&dropoff=<dropoff_address>
+```
+
+#### Headers
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Query Parameters
+- `pickup` (string, required): pickup address, minimum 3 characters.
+- `dropoff` (string, required): dropoff address, minimum 3 characters.
+
+#### Success Response
+```json
+{
+  "fare": {
+    "auto": 120,
+    "car": 180,
+    "motorcycle": 90
+  }
+}
+```
+
+#### Error Responses
+- **400 Bad Request** when validation fails or required query parameters are missing.
+- **500 Internal Server Error** when fare calculation fails.
+
+## Map Endpoints
+
+### Get Coordinates
+Returns latitude and longitude for a provided address.
+
+#### Request
+```http
+GET /maps/get-coordinates?address=<address>
+```
+
+#### Headers
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Response
+```json
+{
+  "ltd": 18.5204,
+  "lng": 73.8567
+}
+```
+
+### Get Distance and Time
+Returns distance and time details between origin and destination.
+
+#### Request
+```http
+GET /maps/get-distance-time?origin=<origin>&destination=<destination>
+```
+
+#### Headers
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Response
+```json
+{
+  "distance": {
+    "text": "5.2 km",
+    "value": 5200
+  },
+  "duration": {
+    "text": "12 mins",
+    "value": 720
+  }
+}
+```
+
+### Get Suggestions
+Returns autocomplete address suggestions for partial input.
+
+#### Request
+```http
+GET /maps/get-suggestions?input=<search_text>
+```
+
+#### Headers
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Response
+```json
+[
+  {
+    "name": "Lane no 4,Sukhsagar Nagar Katraj,Pune",
+    "ltd": 18.5,
+    "lng": 73.8
+  }
+]
+```
+
+## Captain Endpoints
+
+### Register Captain
+Creates a new captain account.
+
+#### Request
+```http
+POST /captains/register
+```
+
+#### Headers
+```
+Content-Type: application/json
+```
+
+#### Request Body
+```json
+{
+  "fullname": {
+    "firstname": "John",
+    "lastname": "Doe"
+  },
+  "email": "johndoe@example.com",
+  "password": "password123",
+  "vehicle": {
+    "color": "Black",
+    "plate": "ABC123",
+    "capacity": 4,
+    "vehicleType": "Sedan"
+  }
+}
+```
+
+#### Success Response
+```json
+{
+  "captain": {
+    "_id": "<CAPTAIN_ID>",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "johndoe@example.com",
+    "vehicle": {
+      "color": "Black",
+      "plate": "ABC123",
+      "capacity": 4,
+      "vehicleType": "Sedan"
+    }
+  },
+  "token": "<JWT_TOKEN>"
+}
+```
+
+#### Error Responses
+- **400 Bad Request** when validation fails.
+- **400 Bad Request** when captain already exists.
+
+### Captain Login
+Authenticates a captain and returns a JWT token.
+
+#### Request
+```http
+POST /captains/login
+```
+
+#### Request Body
+```json
+{
+  "email": "johndoe@example.com",
+  "password": "password123"
+}
+```
+
+#### Success Response
+```json
+{
+  "token": "<JWT_TOKEN>",
+  "captain": {
+    "_id": "<CAPTAIN_ID>",
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "johndoe@example.com"
+  }
+}
+```
+
+### Captain Profile
+Retrieves the authenticated captain profile.
+
+#### Request
+```http
+GET /captains/profile
+```
+
+#### Headers
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Success Response
+```json
+{
+  "success": true,
+  "data": {
+    "id": "string",
+    "name": "string",
+    "email": "string",
+    "vehicle": {
+      "color": "string",
+      "plate": "string",
+      "capacity": "number",
+      "vehicleType": "string"
+    }
+  }
+}
+```
+
+### Captain Logout
+Logs out the currently authenticated captain by blacklisting their token.
+
+#### Request
+```http
+GET /captains/logout
+```
+
+#### Headers
+```
+Authorization: Bearer <jwt_token>
+```
+
+#### Success Response
+```json
+{
+  "message": "Logout successful"
+}
+```
+
+#### Error Response
+```json
+{
+  "message": "Logout failed",
+  "error": "Error details"
+}
+```
+
+---
+
+## Validation Improvements
+
+- **UserProtectedWrapper:**  
+  Now validates the token and user profile more robustly, redirecting to login if invalid or expired.
+
+- **CaptainProtectedWrapper:**  
+  Now validates the token and captain profile more robustly, redirecting to captain login if invalid or expired.
+
+Refer to the frontend wrappers for implementation details.
+
+### Query Parameters
+- `pickup` (string, required): Minimum 3 characters, the pickup address.
+- `dropoff` (string, required): Minimum 3 characters, the dropoff address.
+
+### Response
+```json
+{
+  "fare": {
+    "auto": 120,
+    "car": 180,
+    "motorcycle": 90
+  }
+}
+```
+
+### Error Responses
+- **Status Code:** `400 Bad Request` when validation fails.
+- **Status Code:** `500 Internal Server Error` when fare calculation fails.
 
 ## ' /users/logout' Endpoint
 

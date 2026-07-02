@@ -71,21 +71,24 @@ const user=await userModel.findOne({email}).select('+password');
     res.cookie('token',token);
 
 
-    res.status(200).json({token});
+    res.status(200).json({token,user});
 
 }
 
 
 module.exports.getUserProfile=async(req,res,next)=>{
-    res.status(200).json(req.user);
+    res.status(200).json({user:req.user});
 }
 
-module.exports.logoutUser=async(req,res,next)=>{
-        res.clearCookie('token');
+module.exports.logoutUser = async (req, res, next) => {
+    const token = req.cookies.token || req.headers.authorization?.split(' ')[1];
 
+    res.clearCookie('token');
 
-        await blacklistTokenModel.create({token});
-        const token=req.cookies.token || req.headers.authorization?.split(' ')[1];
-        res.status(200).json({message:'Logout successful'});
-}
+    if (token) {
+        await blacklistTokenModel.create({ token });
+    }
+
+    res.status(200).json({ message: 'Logout successful' });
+};
 

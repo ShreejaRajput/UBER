@@ -95,3 +95,11 @@ module.exports.logoutCaptain = async (req, res, next) => {
         });
     }
 }
+
+module.exports.getCaptainProfile = async (req, res) => {
+
+    res.status(200).json({
+        captain: req.captain
+    })
+
+}
