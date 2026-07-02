@@ -7,13 +7,84 @@ import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import { useState } from 'react'
 import ConfirmRidePopUp from '../Components/ConfirmRidePopUp'
+import { useEffect,useContext } from 'react'
+import{SocketContext} from '../context/SocketContext'
+import {CaptainDataContext} from '../context/CaptainContext'
+import axios from 'axios'
 
 const CaptainHome = () => {
 
-const[ridePopUpPanel,setRidePopUpPanel]=useState(true);
-const ridePopUpPanelRef=useRef(null)
+const[ridePopUpPanel,setRidePopUpPanel]=useState(false);
 const[confirmRidePopUpPanel,setConfirmRidePopUpPanel]=useState(false);
+
+const ridePopUpPanelRef=useRef(null)
 const confirmRidePopUpPanelRef=useRef(null)
+const [ride,setRide]=useState(null);
+
+const{socket}=useContext(SocketContext);
+const {captain}=useContext(CaptainDataContext);
+
+useEffect(() => {
+    socket.emit("join", {
+        userType: "captain",
+        userId: captain._id
+    });
+
+    const updateLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                console.log({ userId: captain._id, location: { ltd: position.coords.latitude, lng: position.coords.longitude } });
+                socket.emit("update-location-captain", {
+                    userId: captain._id,
+                    location: {
+                        ltd: position.coords.latitude,
+                        lng: position.coords.longitude
+                    }
+                });
+            });
+        }
+    };
+
+    const locationInterval = setInterval(updateLocation, 10000);
+    updateLocation();
+
+    socket.on('new-ride', (data) => {
+        console.log('New ride request received:', data);
+        setRide(data);
+         setRidePopUpPanel(true);  // ← show the popup
+    });
+
+
+
+
+    console.log('Socket listener registered for new-ride'); 
+
+    return () => {
+        clearInterval(locationInterval);  // ← cleanup interval
+        socket.off('new-ride');           // ← cleanup listener
+    };
+}, []);
+
+
+async function confirmRide(){
+
+  const response=await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/confirm`,
+    {
+      rideId:ride._id.toString(),
+      captainId:captain._id
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+setRidePopUpPanel(false);
+setConfirmRidePopUpPanel(true);
+}
+
+
+
+
 
 useGSAP(function(){
 if(ridePopUpPanel){
@@ -69,11 +140,18 @@ gsap.to(confirmRidePopUpPanelRef.current,{
       </div>
 
         <div ref={ridePopUpPanelRef}  className='fixed z-10 bottom-0 translate-y-full bg-white w-full px-3 py-6 pt-12'>
-       <RidePopUp setRidePopUpPanel={setRidePopUpPanel} setConfirmRidePopUpPanel={setConfirmRidePopUpPanel}/>
+       <RidePopUp 
+       ride={ride}
+       setRidePopUpPanel={setRidePopUpPanel} 
+       setConfirmRidePopUpPanel={setConfirmRidePopUpPanel}
+       confirmRide={confirmRide}/>
       </div>
       
-        <div ref={confirmRidePopUpPanelRef}  className='fixed z-10 bottom-0 h-[90%] translate-y-full bg-white w-full px-3 py-6 pt-12'>
-       <ConfirmRidePopUp setConfirmRidePopUpPanel={setConfirmRidePopUpPanel} setRidePopUpPanel={setRidePopUpPanel}/>
+        <div ref={confirmRidePopUpPanelRef}  className='fixed z-10 bottom-0 h-[90%] translate-y-full bg-white overflow-y-auto w-full px-3 py-6 pt-12'>
+       <ConfirmRidePopUp 
+       ride={ride}
+       setConfirmRidePopUpPanel={setConfirmRidePopUpPanel} 
+       setRidePopUpPanel={setRidePopUpPanel}/>
       </div>
 
     </div>
@@ -81,4 +159,4 @@ gsap.to(confirmRidePopUpPanelRef.current,{
   )
 }
 
-export default CaptainHome
+export default CaptainHome;

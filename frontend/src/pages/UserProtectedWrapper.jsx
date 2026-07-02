@@ -17,6 +17,7 @@ const UserProtectedWrapper = ({ children }) => {
 
         api.get('/users/profile').then(response => {
             if (response.status === 200) {
+                console.log('profile data:', response.data);
                 setUser(response.data.user);
                 setIsLoading(false);
             }

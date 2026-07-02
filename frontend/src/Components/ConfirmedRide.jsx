@@ -17,7 +17,7 @@ const ConfirmedRide = (props) => {
        <i className="text-lg ri-map-pin-line"></i>
        <div>
         <h3 className='text-lg font-medium'>562/11-A</h3>
-        <p className='text-small -mt-1 text-gray-600'>Kankariya Talab Ahemadabad</p>
+        <p className='text-small -mt-1 text-gray-600'>{props.pickup}</p>
        </div>
        </div>
 
@@ -25,21 +25,23 @@ const ConfirmedRide = (props) => {
         <i className="ri-map-pin-4-line"></i>
        <div>
         <h3 className='text-lg font-medium'>562/11-A</h3>
-        <p className='text-small -mt-1 text-gray-600'>Kankariya Talab Ahemadabad</p>
+        <p className='text-small -mt-1 text-gray-600'>{props.destination}</p>
        </div>
        </div>
     
     <div className='flex items-center gap-5 ml-3'>
     <i className=" ri-money-rupee-circle-fill"></i>
        <div>
-        <h3 className='text-lg font-medium'> ₹193.20</h3>
+        <h3 className='text-lg font-medium'>₹{props.fare[props.vehicleType]}</h3>
         <p className='text-small -mt-1 text-gray-600'>Cash cash</p>
        </div></div>
        </div>
 
        <button onClick={() =>{
-        props.setVehicalFound(true) 
-      props.setvehiclePanel(false)
+         props.setConfirmedRidePanel(false);  // ← close this panel first
+    props.setvehiclePanel(false);
+    props.setVehicalFound(true);         // ← then show looking for driver
+    props.createRide();
     }} 
         className='w-full text-white bg-green-600 font-semibold p-2 rounded-lg mt-5'>Confirm</button>
     </div>

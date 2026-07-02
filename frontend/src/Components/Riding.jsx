@@ -1,7 +1,27 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import {useEffect,useContext} from 'react'
+import {SocketContext} from '../context/SocketContext'
+import { useNavigate } from 'react-router-dom'
+import LiveTracking from '../Components/LiveTracking'
+
 
 const Riding = () => {
+  const location = useLocation();
+  const ride = location.state?.ride || null;
+const {socket}=useContext(SocketContext);
+const navigate=useNavigate();
+
+useEffect(() => {
+  if (!socket) return;
+  const onEnded = (data) => {
+    console.log('Ride ended:', data);
+    navigate('/home');
+  };
+  socket.on('ride-ended', onEnded);
+  return () => socket.off('ride-ended', onEnded);
+}, [socket]);
+
   return (
     <div className='h-screen'>
 
@@ -11,19 +31,23 @@ const Riding = () => {
 
 
       <div className='relative h-1/2'>
-        <img
-        className='h-full w-full object-cover absolute top-0 left-0 z-0'
-        src="https://t3.ftcdn.net/jpg/07/28/30/26/360_F_728302620_Xddnf5Cl0K1ACZurd6yByUzHiHMMIoe6.jpg"
-        alt="" />
+        <LiveTracking ride={ride} />
       </div>
       
       <div className='h-1/2 p-4'>
               <div className='flex items-center justify-between '>
-                <img className='h-12 ' src="https://mobile-content.uber.com/launch-experience/top_bar_rides_3d.png" alt="" />
-              <div className='text-right'>
-                <h2 className='text-lg font-medium'>Shreeja </h2>
-                <h4 className='text-xl font-semibold -mt-2 -md-1'>MH 12 KZ 6898</h4>
-                <p className='text-sm text-gray-600'>Maruti Suzuki Alto</p>
+                {/* <img className='h-12 ' src="https://mobile-content.uber.com/launch-experience/top_bar_rides_3d.png" alt="" />*/}
+                {/* <LiveTracking/> */}
+              <div className='text-right'> 
+                <h2 className='text-lg font-medium'>
+                  {ride?.captain?.fullname?.firstname || 'Captain'}
+                </h2>
+                <h4 className='text-xl font-semibold -mt-2 -md-1'>
+                  {ride?.captain?.vehicle?.plate || 'Vehicle'}
+                </h4>
+                <p className='text-sm text-gray-600'>
+                  {ride?.captain?.vehicle?.type || 'Vehicle'}
+                </p>
 
               </div>
         </div>
@@ -38,9 +62,9 @@ const Riding = () => {
             <i className="fa-solid fa-location-arrow"></i>
 
             <div>
-              <h3 className="text-lg font-medium">562/11-A</h3>
+              <h3 className="text-lg font-medium">Pickup</h3>
               <p className="text-small -mt-1 text-gray-600">
-                Kankariya Talab Ahemadabad
+                {ride?.pickup || 'Pickup location'}
               </p>
             </div>
 
@@ -49,8 +73,8 @@ const Riding = () => {
           <div className="flex items-center gap-5 ml-3">
             <i className="fa-solid fa-money-bill"></i>
             <div>
-              <h3 className="text-lg font-medium"> ₹193.20</h3>
-              <p className="text-small -mt-1 text-gray-600">Cash cash</p>
+              <h3 className="text-lg font-medium">₹{ride?.fare || 0}</h3>
+              <p className="text-small -mt-1 text-gray-600">{ride?.destination || 'Destination'}</p>
             </div>
           </div>
         </div>
